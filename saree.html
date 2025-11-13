@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Saree Inventory</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: linear-gradient(to right, #e0c3fc, #8ec5fc);
+    }
+    h1 {
+      text-align: center;
+      color: #4b2e00;
+    }
+    form {
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    input, button {
+      padding: 8px;
+      font-size: 16px;
+    }
+    #searchBox {
+      margin-bottom: 20px;
+      padding: 8px;
+      font-size: 16px;
+      width: 100%;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: #fff;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #eee;
+    }
+    td img {
+      transition: transform 0.3s ease;
+      cursor: zoom-in;
+      max-width: 60px;
+    }
+    td img:hover {
+      transform: scale(2.5);
+      z-index: 10;
+      position: relative;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Saree Inventory</h1>
+
+  <form id="inventoryForm">
+    <input type="text" id="itemName" placeholder="Item Name" required>
+    <input type="file" id="image" accept="image/*" required>
+    <button type="submit">Add</button>
+  </form>
+
+  <input type="text" id="searchBox" placeholder="Search sarees by name">
+
+  <table id="inventoryTable">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Item Name</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('inventoryForm');
+    const tableBody = document.querySelector('#inventoryTable tbody');
+    const searchBox = document.getElementById('searchBox');
+
+    let sarees = JSON.parse(localStorage.getItem('sareeInventory')) || [];
+
+    function renderTable(data) {
+      tableBody.innerHTML = '';
+      data.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><img src="${item.image}" alt="${item.name}"></td>
+          <td>${item.name}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const reader = new FileReader();
+      const file = document.getElementById('image').files[0];
+
+      reader.onload = function() {
+        const newItem = {
+          name: document.getElementById('itemName').value,
+          image: reader.result
+        };
+        sarees.push(newItem);
+        localStorage.setItem('sareeInventory', JSON.stringify(sarees));
+        renderTable(sarees);
+        form.reset();
+      };
+
+      if (file) reader.readAsDataURL(file);
+    });
+
+    searchBox.addEventListener('input', function() {
+      const query = this.value.toLowerCase();
+      const filtered = sarees.filter(item =>
+        item.name.toLowerCase().includes(query)
+      );
+      renderTable(filtered);
+    });
+
+    renderTable(sarees);
+  </script>
+
+</body>
+</html>
